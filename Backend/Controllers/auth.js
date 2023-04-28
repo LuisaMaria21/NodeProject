@@ -1,37 +1,39 @@
 const express = require('express');
-const { validationResult } = require('express-validator');
+const Usuario = require('../models/usuario');
+const { json } = require('body-parser');
+const bcrypt = require('bcryptjs')
 
-const crearUsuario = (req, res = express.request) => {
-    const {name, email, password } = req.body
+const loginUsuario = async (req, res = express.request) => {
+    const { email, password } = req.body
 
-    const errors = validationResult ( req );
-    if ( !errors.isEmpty() ) {
-        return res.status(400).json({
+    try {
+        let usuario = await Usuario.findOne({ email: email })
+        if(!usuario){
+            return res.status(400).json({
+                ok: false,
+                msg: 'El usuario NO existe',
+            })
+        }
+
+        const passwordValid = bcrypt.compareSync(password, usuario.password);
+        if ( !passwordValid ){
+            return res.status(400),json({
+                ok: false,
+                msg: 'El password NO es válido',
+            })
+        }
+
+        res.status(200).json({
+            ok: true,
+            usuario,
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
             ok: false,
-            errors: errors.mapped()
+            error,
         })
     }
-
-    res.status(200).json({
-        ok: true,
-        name, email, password
-    })
-}
-
-const loginUsuario = (req, res = express.request) => {
-    res.json({
-        ok: true
-    })
-}
-
-const revalidarToken = (req, res = express.request) => {
-    res.json({
-        ok: true
-    })
-}
-
-module.exports = {
-    crearUsuario,
-    loginUsuario,
-    revalidarToken
+    
 }
