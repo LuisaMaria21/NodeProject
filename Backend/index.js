@@ -1,20 +1,22 @@
-console.log ('Holis :)')
-const bodyParser = require('body-parser')
-
-const express = require('express')
-require('dotenv').config()
-
-//Crear Express App
+const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+const { validateRegister } = require('./validation');
 
 
-//Rutas
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
-app.use(express.static('public'))
 
-app.use('/api/auth', require('./Rutas/auth'))
+app.post('/register', validateRegister, (req, res) => {
+  
+  const { username, email, password } = req.body;
 
-app.listen(process.env.PORT, () =>{
-    console.log('Servidor corriendo en puerto', process.env.PORT)
-})
+  
+
+  res.status(200).json({ message: 'Registro exitoso' });
+});
+
+
+app.listen(3000, () => {
+  console.log('Servidor iniciado en el puerto 3000');
+});
